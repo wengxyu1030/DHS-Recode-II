@@ -21,7 +21,7 @@ macro drop _all
 global root "C:/Users/wb500886/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA"
 
 * Define path for data sources
-global SOURCE "${root}/RAW DATA/Recode III"
+global SOURCE "${root}/RAW DATA/Recode II"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -30,10 +30,11 @@ global OUT "${root}/STATA/DATA/SC/FINAL"
 global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "C:\Users\wb500886\OneDrive - WBG\10_Health\UHC\GitHub\DHS-Recode-III"
+global DO "C:\Users\wb500886\OneDrive - WBG\10_Health\UHC\GitHub\DHS-Recode-II"
 
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
+
 
 
 foreach name in $DHScountries_Recode_III{	
@@ -310,6 +311,8 @@ rename (hm_hc70 hm_hc71 ) (hc70 hc71)
 
 rename c_ant_sampleweight ant_sampleweight
 drop c_placeholder
+
+/*
 ***survey level data
     gen survey = "DHS-`name'"
 	gen year = real(substr("`name'",-4,.))
@@ -330,7 +333,7 @@ preserve
 	cd "${INTER}"
 	do "${DO}/Quality_control_result"
 	save "${OUT}/quality_control",replace 
-    restore 
+restore 
 
 
 	
@@ -360,7 +363,7 @@ preserve
     }
 	
 	***for vriables generated from 9_child_anthropometrics
-	foreach var of var c_underweight c_stunted	hc70 hc71 ant_sampleweight{
+	foreach var of var c_underweight hc70 hc71 c_stunted ant_sampleweight{
     replace `var' = . if !inrange(hm_age_mon,0,59)
     }
 	
@@ -387,7 +390,7 @@ preserve
 	capture confirm file"${INTER}/zsc_hm.dta"
     if _rc == 0 {
     erase "${INTER}/zsc_hm.dta"
-    }	 
+    }	  */
 
 	
 save "${OUT}/DHS-`name'.dta", replace   
