@@ -1,0 +1,97 @@
+---
+title: "Skilled_worker"
+author: "Aline"
+date: "April 13, 2020"
+output: html_document
+---
+## Note this is all for Recode VI for the indicators relevant to skilled health provider. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. c_anc_skilled
+1. Vraibles involved: birth: m2a-m2n
+2. Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife
+3. Not using other here because here is to specify the people who identified as skilled, if doctor is identified, even other doctor still counts. 
+
+```{r c_anc}
+library(foreign)
+common_path = "C:/Users/wb500886/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA/RAW DATA/Recode VI"
+primary_dirs = list.files(common_path)
+primary_dirs
+
+main_data = data.frame()
+
+for (dir in primary_dirs) {
+  birth <- list.files(paste(common_path,dir,sep = "/"),pattern = "*birth")
+ #there is a file with birth.dta in this directory read it in append to a data.frame
+  for (dta in birth) {
+  temp_data <- read.dta(paste(common_path,dir,sep="/",dta))
+  ctr <- unique(temp_data$v000)
+  temp_data <- as.data.frame(attr(temp_data,"var.labels"))
+  names(temp_data)<-"name"
+  temp_data<-filter(temp_data,grepl("^Prenatal:",temp_data$name,ignore.case = TRUE))%>%mutate(country = ctr)
+  main_data <- rbind(main_data,temp_data)
+  }
+}
+
+skilled <- c("doctor","nurse","midwife","aide Soignante","assistante accoucheuse","clinical officer","mch aide", "trained","auxiliary birth attendant","physician assistant","professional","ferdsher","skilled","community health care provider","birth attendant","hospital/health center worker","hew","auxiliary","icds","feldsher","mch","vhw","village health team","health personnel","gynecolog(ist|y)","obstetrician","internist","pediatrician","family welfare visitor","medical assistant","health assistant") 
+unskilled <- c("na*","traditional birth attendant","untrained","unquallified","empirical midwife")
+main_data$name<-tolower(main_data$name)
+main_data_1<-distinct(main_data)
+main_data_1<- mutate(main_data_1,c_anc_skilled = ifelse(grepl(main_data_1$name,pattern = paste(skilled,collapse = "|"),ignore.case = TRUE),1,0))
+var_list_1<- distinct(select(main_data_1,1,3))
+paste(skilled,collapse = "|")
+
+write.csv(var_list_1,"c_anc_skilled.csv")
+```
+
+## 2. c_sba_skilled
+1. Vraibles involved: birth: m3a-m2n
+2. Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife
+
+```{r c_sba}
+library(foreign)
+common_path = "C:/Users/wb500886/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA/RAW DATA/Recode VI"
+primary_dirs = list.files(common_path)
+primary_dirs
+main_data = data.frame()
+
+for (dir in primary_dirs) {
+  birth <- list.files(paste(common_path,dir,sep = "/"),pattern = "*birth")
+ #there is a file with birth.dta in this directory read it in append to a data.frame
+  for (dta in birth) {
+  temp_data <- read.dta(paste(common_path,dir,sep="/",dta))
+  ctr <- unique(temp_data$v000)
+  temp_data <- as.data.frame(attr(temp_data,"var.labels"))
+  names(temp_data)<-"name"
+  temp_data<-filter(temp_data,grepl("^assistance:",temp_data$name,ignore.case = TRUE))%>%mutate(country = ctr)
+  main_data <- rbind(main_data,temp_data)
+  }
+}
+
+main_data$name<-tolower(main_data$name) //main_data has the full list including the country survey info. 
+main_data_2<-distinct(main_data) //this only contains the distinct list of labels, no survey info. 
+
+skilled <- c("doctor","nurse","midwife","aide soignante","assistante accoucheuse","clinical officer","mch aide", "trained","auxiliary birth attendant","physician assistant","professional","ferdsher","skilled","community health care provider","birth attendant","hospital/health center worker","hew","auxiliary","icds","feldsher","mch","vhw","village health team","health personnel","gynecolog(ist|y)","obstetrician","internist","pediatrician","family welfare visitor","medical assistant","health assistant") 
+unskilled <- c("na^|-na","traditional birth attendant","untrained","unquallified","empirical midwife")
+#"na^", not in the list
+
+a<-grepl(main_data_2$name,pattern = paste(skilled,collapse = "|"),ignore.case = TRUE)
+b<-!grepl(main_data_2$name,pattern = paste(unskilled,collapse = "|"),ignore.case = TRUE)   
+
+main_data_2<- mutate(main_data_2,c_sba_skilled = ifelse(a&b,1,0))
+var_list_2<- distinct(select(main_data_2,1,3))
+
+paste(skilled,collapse = "|")
+paste(unskilled,collapse = "|")
+```
+
+## 3. c_pnc_skilled
+
+m52, m72 labels
+
+```{r c_pnc}
+
+```
