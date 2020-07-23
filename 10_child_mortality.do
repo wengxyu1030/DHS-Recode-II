@@ -4,7 +4,7 @@
 ******************************   
 
 *mor_dob				Child date of birth (cmc)
-    clonevar mor_dob = v011
+    clonevar mor_dob = b3
 	
 *mor_wln				Woman line number in HH to match child with mother (original)
     clonevar mor_wln = v003
