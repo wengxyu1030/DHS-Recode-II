@@ -12,7 +12,7 @@
  gen c_stunted = . 
  gen c_underweight = . 
  
- capture confirm varriable hc70 hc71 
+ capture confirm variable hc70 hc71 
  
  if _rc == 0 {
     foreach var in hc70 hc71 {
