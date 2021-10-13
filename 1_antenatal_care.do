@@ -18,37 +18,64 @@ order *,sequential
 
 	*c_anc_any: any antenatal care visits of births in last 2 years
 	gen c_anc_any = .
-	replace c_anc_any = 1 if inrange(m14,1,20)
+	replace c_anc_any = 1 if inrange(m14,1,97)
 	replace c_anc_any = 0 if m14 == 0                                              //m14 = 98 is missing 
 	
 	*c_anc_ear: First antenatal care visit in first trimester of pregnancy of births in last 2 years
-	gen c_anc_ear = 0 if m2n == 0    // m13 based on Women who had seen someone for antenatal care for their last born child
+	gen c_anc_ear = 0 if !inlist(m2n,.,9)    // m13 based on Women who had seen someone for antenatal care for their last born child
 	replace c_anc_ear = 1 if inrange(m13,0,3)
-	replace c_anc_ear = . if m13 == 98 
-	
+	replace c_anc_ear = . if inlist(m13,98,99,.) & m2n !=1 
+
 	*c_anc_ear_q: First antenatal care visit in first trimester of pregnancy among ANC users of births in last 2 years
-	gen c_anc_ear_q = .
-	replace c_anc_ear_q = 1 if c_anc_ear == 1 & c_anc_any == 1
-	replace c_anc_ear_q = 0 if c_anc_ear == 0 & c_anc_any == 1
+	gen c_anc_ear_q = c_anc_ear if c_anc_any == 1
 	
 	*anc_skill: Categories as skilled: doctor, nurse, midwife, auxiliary nurse/midwife...
-	foreach var of varlist m2a-m2n {
+	foreach var of varlist m2a-m2m {
 	local lab: variable label `var' 
-    replace `var' = . if ///
-        !regexm("`lab'","trained") & ///
-	(!regexm("`lab'","doctor|nurse|midwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant") ///
-	|regexm("`lab'","na^|-na|traditional birth attendant|untrained|unquallified|empirical midwife") )
+    replace `var' = . if !regexm("`lab'","trained") & ///
+	  (!regexm("`lab'","doctor|nurse|Nurse|Assistante Accoucheuse|family welf.visitor|midwife|mifwife|aide soignante|assistante accoucheuse|hosp/hc brth attend|(sanitario)|(ma/sacmo)|rural medical aide|cs health profession|gynaecologist|medex|MCH AIDE|mch worker|nursing aide|clinical officer|(feldsher/other)|(Technical Nurse)|clin off/med assist|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|vhw|village health team|health personnel|gynecolog(ist|y)|internist|pediatrician|family welfare visitor|medical assistant|health assistant|ma/sacmo|health officer|ob-gy") ///
+	|regexm("`lab'","na^|-na|na -|NA -|- na|- NA|-NA| na!|trad.birth|vhw|traditional birth attendant|untrained|health assistant|medical assistant/icp|obgyn|anganwadi/icds worker|unquallified|unqualified|empirical midwife|trad.| other|vhw")) &  !(regexm("`lab'","doctor|health prof.")&regexm("`lab'","other")) | regexm("`lab'","untrained")
 	replace `var' = . if !inlist(`var',0,1)
-	 }
+	}
+	if inlist(name,"Madagascar1992","Morocco1992"){
+		replace m2c=.
+	}	 
+	if inlist(name,"Nigeria1990"){
+		replace m2c=.
+		replace m2i=.
+	}
+	if inlist(name,"Philippines1993"){
+		replace m2e=.
+		replace m2d=.
+	}
+	if inlist(name,"Zambia1992"){
+		replace m2d=. //clinical officer
+	}	
 	/* do consider as skilled if contain words in 
 	   the first group but don't contain any words in the second group */
-    egen anc_skill = rowtotal(m2a-m2n),mi	
+    egen anc_skill = rowtotal(m2a-m2m),mi	
 	
+	if inlist(name,"DominicanRepublic1991"){
+		ren (s410a s410c) (m42d m42e)
+	}
+	if inlist(name,"India1992"){
+		ren s413 m45
+	}
+	if inlist(name,"Paraguay1990"){
+		ren (s407a s407b s407c) (m42c m42d m42e)
+	}	
 	*c_anc_eff: Effective ANC (4+ antenatal care visits, any skilled provider, blood pressure, blood and urine samples) of births in last 2 years
-    gen anc_blood = .  //no data point in recode III
-/*  egen anc_blood = rowtotal(m42c m42d m42e) if m2n == 0 */
-	gen c_anc_eff = (c_anc == 1 & anc_skill>0 & anc_blood == 3) 
-	replace c_anc_eff = . if c_anc ==. |  anc_skill==. | anc_blood == . 
+	capture confirm variable m42e m42c m42d
+	if _rc==0 {
+		egen anc_blood = rowtotal(m42c m42d m42e) if m2n == 0 
+		gen c_anc_eff = (c_anc == 1 & anc_skill>0 & anc_blood == 3) 
+		replace c_anc_eff = . if c_anc ==. |  anc_skill==. |((inlist(m42c,.,8,9)|inlist(m42d,.,8,9)|inlist(m42e,.,8,9)) & m2n!=1 )
+	}
+	if _rc!=0 {
+		gen anc_blood = .  //no data point in recode III
+		gen c_anc_eff = (c_anc == 1 & anc_skill>0 & anc_blood == 3) 
+		replace c_anc_eff = . if c_anc ==. |  anc_skill==. | anc_blood == . 
+	}
 
 
 	*c_anc_eff_q: Effective ANC (4+ antenatal care visits, any skilled provider, blood pressure, blood and urine samples) among ANC users of births in last 2 years
@@ -56,49 +83,65 @@ order *,sequential
 		
 	*c_anc_ski: antenatal care visit with skilled provider for pregnancy of births in last 2 years
 	gen c_anc_ski = .
-	replace c_anc_ski = 1 if anc_skill >= 1
+	replace c_anc_ski = 1 if anc_skill >= 1 & anc_skill!=.
 	replace c_anc_ski = 0 if anc_skill == 0
 	
 	*c_anc_ski_q: antenatal care visit with skilled provider among ANC users for pregnancy of births in last 2 years
-	gen c_anc_ski_q = (c_anc_ski == 1) if c_anc_any == 1 
-	replace c_anc_ski_q = . if mi(c_anc_ski) & c_anc_any == 1
+	gen c_anc_ski_q = c_anc_ski  if c_anc_any == 1 
 	
     *c_anc_bp: Blood pressure measured during pregnancy of births in last 2 years
-	gen c_anc_bp = .
-/* 	gen c_anc_bp = 0 if m2n == 0    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
-	replace c_anc_bp = 1 if m42c==1 
- */
+	capture confirm variable  m42c 
+	if _rc==0 {
+		gen c_anc_bp = 0 if m2n == 0    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
+		replace c_anc_bp = 1 if m42c==1 //& c_anc_bp == 0
+	}
+	if _rc!=0 {
+		gen c_anc_bp = .
+	}
 	
 	*c_anc_bp_q: Blood pressure measured during pregnancy among ANC users of births in last 2 years
-	gen c_anc_bp_q = (c_anc_bp==1) if c_anc_any == 1 
-	replace c_anc_bp_q = . if mi(c_anc_bp) & c_anc_any == 1 
+	gen c_anc_bp_q = c_anc_bp if c_anc_any == 1 
 
 	*c_anc_bs: Blood sample taken during pregnancy of births in last 2 years
-	gen c_anc_bs = .
-/* 	gen c_anc_bs = 0 if m2n == 0    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
-	replace c_anc_bs = 1 if m42e==1
- */	
+	capture confirm variable  m42e 
+	if _rc==0 {
+ 	gen c_anc_bs = 0 if m2n == 0    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
+	replace c_anc_bs = 1 if m42e==1 //& c_anc_bs == 0
+	}
+	if _rc!=0 {
+		gen c_anc_bs = .
+	}
+	
 	*c_anc_bs_q: Blood sample taken during pregnancy among ANC users of births in last 2 years
-	gen c_anc_bs_q = (c_anc_bs==1) if c_anc_any == 1 
-	replace c_anc_bs_q = . if c_anc_bs == . & c_anc_any == 1
+	gen c_anc_bs_q = c_anc_bs if c_anc_any == 1 
 	
 	*c_anc_ur: Urine sample taken during pregnancy of births in last 2 years
-	gen c_anc_ur = .
-/* 	gen c_anc_ur = 0 if m2n == 0    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
-	replace c_anc_ur = 1 if m42d==1	
- */	
+	capture confirm variable  m42d 
+	if _rc==0 {
+		gen c_anc_ur = 0 if m2n == 0    // For m42a to m42e based on women who had seen someone for antenatal care for their last born child
+		replace c_anc_ur = 1 if m42d==1 //& c_anc_ur == 0
+	}
+	if _rc!=0 {
+		gen c_anc_ur = .
+	}
 	*c_anc_ur_q: Urine sample taken during pregnancy among ANC users of births in last 2 years
-	gen c_anc_ur_q = (c_anc_ur==1) if c_anc_any == 1 
-	replace c_anc_ur_q = . if mi(c_anc_ur) & c_anc_any == 1 
+	gen c_anc_ur_q = c_anc_ur if c_anc_any == 1 
 	
 	*c_anc_ir: iron supplements taken during pregnancy of births in last 2 years
-	gen c_anc_ir = .
-/* 	clonevar c_anc_ir = m45
-	replace c_anc_ir = . if m45 == 8 */
+	if inlist(name,"Philippines1993"){
+		ren s409a m45
+	}
+	capture confirm variable  m45
+	if _rc==0 {
+		clonevar c_anc_ir = m45
+		replace c_anc_ir = . if m45 == 8 | m45 == 9
+	}
+	if _rc!=0 {
+		gen c_anc_ir = .
+	}
 	
 	*c_anc_ir_q: iron supplements taken during pregnancy among ANC users of births in last 2 years
-	gen c_anc_ir_q = (c_anc_ir == 1 ) if c_anc_any == 1 
-	replace c_anc_ir_q = . if c_anc_any == 1 & mi(c_anc_ir)
+	gen c_anc_ir_q = c_anc_ir if c_anc_any == 1 
 	
 	*c_anc_tet: pregnant women vaccinated against tetanus for last birth in last 2 years
 	gen c_anc_tet = .   //no pregnant women tetanus injection information.  
@@ -154,7 +197,32 @@ order *,sequential
 	*w_sampleweight.
 	gen w_sampleweight = v005/10e6
 
+	* For Brazil1991, the v001/v002 lost 2-3 digits, fix this issue in main.do, 1.do,4.do,12.do & 13.do
+	if inlist(name,"Brazil1991"){
+		ren v023 hm_shstruct
+		isid hm_shstruct v001 v002 v003 bidx
+	}		
+	if inlist(name,"Cameroon1991"){
+		drop v002
+		gen v002 = substr(caseid,11,2)
+		gen hm_shstruct = substr(caseid,8,3)
+		isid hm_shstruct v001 v002 v003 bidx
+		order  caseid v000 v001 hm_shstruct v002 v003
+		destring hm_shstruct v002,replace
+	}		
+	if inlist(name,"Colombia1990"){
+		drop v002
+		gen v002 = substr(caseid,10,3)
+		order caseid v000 v001 v002 v003
+		isid v001 v002 v003 bidx
+		destring v002,replace
+	}			
+	if inlist(name,"DominicanRepublic1991","Niger1992"){
+		gen hm_shstruct = substr(caseid,8,3)
+		order caseid v000 v001 hm_shstruct v002 v003
+		duplicates drop caseid bidx,force // drop 5 duplicates 
+		isid v001 hm_shstruct  v002 v003 bidx
+		destring hm_shstruct,replace
+	}
 	
-
-
-
+cap gen hm_shstruct =999

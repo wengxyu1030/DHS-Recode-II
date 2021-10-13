@@ -7,7 +7,16 @@
     clonevar hh_id = hhid
 	
 *hh_headed	Head's highest educational attainment (1 = none, 2 = primary, 3 = lower sec or higher)
-    recode hv106 (0 = 1) (1 = 2) (2/3 = 3) (8=.) if hv101 == 1,gen(hh_headed)
+	if inlist(name, "DominicanRepublic1991","India1992","Malawi1992","Niger1992","Senegal1992", "Senegal1997"){
+		replace hv101=98 if hvidx!=hv218 & hv101==1
+	} // for points that have hh with multiple hh head, judge hh head by hv218 and recode members hv101=98 if they are not hh head
+	
+	if inlist(name, "India1992","Morocco1992"){
+		replace hv101=1 if hvidx==hv218 & hv101!=1
+	} // for points that have hh with no hh head, judge hh head by hv218 and recode members hv101=1 if they are actually hh head
+
+    recode hv106 (0 = 1) (1 = 2) (2/3 = 3) (8 9 6=.) if hv101 == 1,gen(headed)
+	bysort hh_id: egen hh_headed = min(headed)
 	
 * hh_country_code Country code
 	clonevar hh_country_code = hv000 							  
@@ -46,6 +55,6 @@
 *hv001 Sampling cluster number (original)
 *hv002 Household number (original)
 *hv003 Respondent's line number in household roster (original)
-
-duplicates drop hv001 hv002,force
+cap gen hm_shstruct=999
+duplicates drop hv001 hm_shstruct hv002,force
 	

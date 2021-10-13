@@ -295,28 +295,28 @@ global DHScountries_Recode_II
  Colombia1990         
  DominicanRepublic1991
  Egypt1992            
+ Ghana1993            
  India1992            
  Indonesia1991        
  Jordan1990           
+ Kenya1993            
  Madagascar1992       
  Malawi1992           
  Morocco1992          
- Namibia1992          
+ Namibia1992         
  Niger1992            
  Nigeria1990          
  Pakistan1990         
  Paraguay1990         
  Peru1991             
+ Philippines1993   
  Rwanda1992           
  Senegal1992          
- Tanzania1991         
- Yemen1991            
- Zambia1992           
- Ghana1993            
- Kenya1993            
- Philippines1993      
  Senegal1997          
+ Tanzania1991         
  Turkey1993
+ Yemen1991            
+ Zambia1992              
 ";
 #delimit cr
 

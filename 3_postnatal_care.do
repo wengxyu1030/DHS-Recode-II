@@ -27,13 +27,29 @@
     replace c_pnc_any = 1 if (m71 <= 306 & m72_skill == 1 ) | (m51a <= 306 /* & m52_skill == 1 */)
     replace c_pnc_any = . if inlist(m71,199,299,399,998)| inlist(m51a,998)| m72_skill == . /* | m52_skill == . */
  */
-	
+	if inlist(name,"Philippines1993"){
+		egen skill = rowtotal(s417a s417b s417c s417d),mi
+		replace c_pnc_skill = 1 if skill >=1 & skill<.
+		replace c_pnc_skill = 0 if skill ==0
+		egen monchild = rowtotal(s419a s419b s419c s419d s419e),mi
+		
+		replace c_pnc_any = 0 if s417g!=.
+		replace c_pnc_any = 1 if c_pnc_skill==1 & inrange(s418,100,236) & (s419a==1 | s419b==1)
+		replace c_pnc_any = . if (monchild == . | s418>=998 ) & s417g!=1
+		
+	}
 	*c_pnc_eff: mother AND child in first 24h by skilled health worker		
     gen c_pnc_eff = .
 /* 	replace c_pnc_eff = 0 if m51a != . | /* m52_skill != . | */ m71 != . | m72_skill != .   
     replace c_pnc_eff = 1 if ((inrange(m51a,100,124) | m51a == 201 ) /* & m52_skill == 1 */) & ((inrange(m71,100,124) | m71 == 201) & m72_skill == 1 )
     replace c_pnc_eff = . if inlist(m51a,199,299,399,998) | /* m52_skill == . | */ inlist(m71,199,299,399,998) | m72_skill == .              
  */	
+	if inlist(name,"Philippines1993"){		
+		replace c_pnc_eff = 0 if s417g!=.
+		replace c_pnc_eff = 1 if c_pnc_skill==1 & inrange(s418,100,236) & s419a==1 & s419b==1
+		replace c_pnc_eff = . if (monchild == . | s418>=998 ) & s417g!=1
+	}
+
 	*c_pnc_eff_q: mother AND child in first 24h by skilled health worker among those with any PNC
 	gen c_pnc_eff_q = c_pnc_eff
 	replace c_pnc_eff_q = . if c_pnc_any == 0

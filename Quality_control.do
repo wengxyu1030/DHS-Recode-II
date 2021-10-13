@@ -5,6 +5,20 @@
 for example the hiv data in DHS and adult indicators in HEFPI,
 could be adjusted later */
 
+/* Note: run for DHS.dta and replace, to allign with HEFPI 
+use "${SOURCE}/external/DHS.dta", clear
+replace surveyid = "BF1992DHS" if surveyid == "BF1993DHS"
+replace surveyid = "DO1991DHS" if surveyid == "DR1991DHS"
+replace surveyid = "NE1992DHS" if surveyid == "NI1992DHS"
+replace surveyid = "NA1992DHS" if surveyid == "NM1992DHS"
+replace surveyid = "PK1990DHS" if surveyid == "PK1991DHS"
+replace surveyid = "PE1991DHS" if surveyid == "PE1992DHS"
+replace surveyid = "MG1992DHS" if surveyid == "MD1992DHS"
+replace surveyid = "IN1992DHS" if surveyid == "IA1993DHS"
+replace surveyid = "SN1992DHS" if surveyid == "SN1993DHS"
+
+save, replace
+*/
 tempfile dhs hefpi
 
 ////////////////////////////////////////////////////////////////
@@ -69,8 +83,10 @@ c_ari2 c_diarrhea 	c_diarrhea_hmf	c_diarrhea_mof c_diarrhea_pro	c_fever	c_treatd
 *********************************
 *****Calculate the indicators****
 *********************************
-*ssc install _gwtmean   //use this package to calculate the weighted mean. 
-
+capture which _gwtmean  //use this package to calculate the weighted mean. 
+	if _rc!=0{
+		ssc install _gwtmean,replace  
+	}
 gen ispreferred = "1"   //there are dif. definition for same indicator in DHS data. 
 
 *indicators calculate using ant_samplewieght (child sample weight = women sample weight)
@@ -144,16 +160,14 @@ The bidx is nt used in the hefpi indicator caluclation
 	}
 	
 	***for women, reference population differs.
-    if inlist(name,"Armenia2010"){
     replace w_papsmear=. if hm_age_yrs<20|hm_age_yrs>49
 	replace w_mammogram=. if hm_age_yrs<40|hm_age_yrs>49
-	}	
 	
 	
 ***for variables generated from 7_child_vaccination
 	foreach var of var c_bcg c_dpt1 c_dpt2 c_dpt3 c_fullimm c_measles ///
 	c_polio1 c_polio2 c_polio3{
-    replace `var' = . if !inrange(hm_age_mon,15,23)
+    replace `var' = . if !inrange(hm_age_mon,12,23)
     }
 
 ***for variables generated from 8_child_illness	

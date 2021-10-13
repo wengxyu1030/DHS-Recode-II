@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-*** DHS MONITORING: V
+*** DHS MONITORING: II
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 version 15.1
@@ -18,10 +18,10 @@ macro drop _all
 
 //NOTE FOR WINDOWS USERS : use "/" instead of "\" in your paths
 
-global root "C:/Users/wb500886/WBG/Sven Neelsen - World Bank/MEASURE UHC DATA"
+global root "/Users/xianzhang/Dropbox/DHS"
 
 * Define path for data sources
-global SOURCE "${root}/RAW DATA/Recode II"
+global SOURCE "/Users/xianzhang/Desktop/Recode II"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -30,14 +30,18 @@ global OUT "${root}/STATA/DATA/SC/FINAL"
 global INTER "${root}/STATA/DATA/SC/INTER"
 
 * Define path for do-files
-global DO "C:\Users\wb500886\OneDrive - WBG\10_Health\UHC\GitHub\DHS-Recode-II"
+global DO "${root}/STATA/DO/SC/DHS/Recode II"
 
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
+global mc "/Users/xianzhang/Dropbox"
 
+// Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993 India1992 Indonesia1991 Jordan1990 
+// Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 
+// Philippines1993  Rwanda1992  Senegal1992 Senegal1997  Tanzania1991 Turkey1993 Yemen1991  Zambia1992           
+             
 
-
-foreach name in $DHScountries_Recode_III{	
+foreach name in   India1992 { //{
 
 tempfile birth ind men hm hiv hh wi zsc iso 
 
@@ -51,8 +55,18 @@ if _rc == 0 {
 	
     if hwlevel == 2 {
 		gen caseid = hwcaseid
-		gen bidx = hwline   	  
-		merge 1:1 caseid bidx using "${SOURCE}/DHS-`name'/DHS-`name'birth.dta"
+		gen bidx = hwline   	
+		gen name = "`name'"
+		if inlist(name,"DominicanRepublic1991"){
+			tempfile DRbirth
+			preserve
+			use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta",clear
+			duplicates drop caseid bidx,force // drop 5 duplicates 
+			save `DRbirth',replace
+			restore 
+			merge 1:1 caseid bidx using `DRbirth'
+		}
+		else merge 1:1 caseid bidx using "${SOURCE}/DHS-`name'/DHS-`name'birth.dta"
     	gen ant_sampleweight = v005/10e6  
     	drop if _!=3
 		
@@ -146,11 +160,12 @@ use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta", clear
 	
 	*generate b16 as place holder
 	//b16 Child's line number in household is missing in Recode III
-	gen b16 = s219  //s219 as alternative in Bangladesh1999, please check this by survey.
-    
+	//gen b16 = s219  //s219 as alternative in Bangladesh1999, please check this by survey.
+    cap gen b16 = . 
+	
 	*identify the case where there is no child line info in hm.dta 
     mdesc b16 
-    gen miss_b16 = 1 if r(percent) == 1 
+    gen miss_b16 = 1 if r(percent) == 100 
 
 if miss_b16 != 1 {
 rename (v001 v002 b16) (hv001 hv002 hvidx)
@@ -170,6 +185,9 @@ save `birth'
 use "${SOURCE}/DHS-`name'/DHS-`name'ind.dta", clear	
 gen name = "`name'"
 gen hm_age_yrs = v012
+if inlist(name,"DominicanRepublic1991"){
+	duplicates drop caseid,force // drop 2 duplicates 
+}
     do "${DO}/4_sexual_health"
     do "${DO}/5_woman_anthropometrics"
     do "${DO}/16_woman_cancer"
@@ -189,6 +207,7 @@ save `ind'
 ************************************
 use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
 gen name = "`name'"
+	duplicates drop
     do "${DO}/13_adult"
     do "${DO}/14_demographics"
 	
@@ -209,6 +228,7 @@ capture confirm file "${INTER}/zsc_hm.dta"
 gen c_placeholder = 1
 keep hv001 hv002 hvidx  ///
 a_* hm_* ln c_*  
+cap gen hm_shstruct =999
 save `hm'
 
 capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
@@ -220,79 +240,159 @@ capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'hiv.dta"
     gen a_hiv = . 
     gen a_hiv_sampleweight = .
     }  
-keep a_hiv* hv001 hv002 hvidx
+cap gen hm_shstruct =999
+keep a_hiv* hv001 hm_shstruct hv002 hvidx 
 save `hiv'
 
 use `hm',clear
-merge 1:1 hv001 hv002 hvidx using `hiv'
+merge 1:1 hv001 hm_shstruct hv002 hvidx using `hiv'
 drop _merge
 save `hm',replace
- 
+
 ************************************
 *****domains using hh level data****
 ************************************
+gen name = "`name'"
+if !inlist(name,"Brazil1991","Cameroon1991","Colombia1990","DominicanRepublic1991","Niger1992"){
 use "${SOURCE}/DHS-`name'/DHS-`name'hm.dta", clear
     rename (hv001 hv002 hvidx) (v001 v002 v003)
 
     merge 1:m v001 v002 v003 using "${SOURCE}/DHS-`name'/DHS-`name'birth.dta"
     rename (v001 v002 v003) (hv001 hv002 hvidx) 
     drop _merge
+	cap gen hm_shstruct =999 
+	gen name = "`name'"
+}
 
-    do "${DO}/15_household"
+* For Brazil1991, the v001/v002 lost 2-3 digits, fix this issue in main.do, 1.do,4.do,12.do & 13.do
+if inlist(name,"Brazil1991","Cameroon1991","Colombia1990","DominicanRepublic1991","Niger1992"){
+	tempfile birthspec
+	if inlist(name,"Brazil1991"){
+		use "${SOURCE}/DHS-Brazil1991/DHS-Brazil1991birth.dta",clear
+		ren v023 hm_shstruct
+		save `birthspec',replace
+		
+		use "${SOURCE}/DHS-Brazil1991/DHS-Brazil1991hm.dta", clear
+		ren hv023 hm_shstruct
+		order hhid hv000 hm_shstruct hv001 hv002 hvidx
+		gen name = "`name'"
+	}
+	if inlist(name,"Cameroon1991"){
+		use "${SOURCE}/DHS-Cameroon1991/DHS-Cameroon1991birth.dta",clear
+		drop v002
+		gen v002 = substr(caseid,11,2)
+		gen hm_shstruct = substr(caseid,8,3)
+		destring hm_shstruct v002,replace
+		save `birthspec',replace
 
-keep hhid hv001 hv002 hv003 hh_* 
-save `hh',replace
+		use "${SOURCE}/DHS-Cameroon1991/DHS-Cameroon1991hm.dta", clear
+		drop hv002
+		ren (shstruct shmenage) (hm_shstruct hv002)
+		gen name = "`name'"	
+	}
+	if inlist(name,"Colombia1990"){
+		use "${SOURCE}/DHS-Colombia1990/DHS-Colombia1990birth.dta",clear
+		drop v002
+		gen v002 = substr(caseid,10,3)
+		destring v002,replace
+		gen hm_shstruct = 999
+		save `birthspec',replace
+		
+		use "${SOURCE}/DHS-Colombia1990/DHS-Colombia1990hm.dta", clear
+		drop hv002
+		gen hv002 = substr(hhid,10,3)
+		destring hv002,replace
+		gen name = "`name'"
+	}
+	if inlist(name,"DominicanRepublic1991"){
+		use "${SOURCE}/DHS-DominicanRepublic1991/DHS-DominicanRepublic1991birth.dta",clear
+		gen hm_shstruct = substr(caseid,8,3)
+		destring hm_shstruct,replace
+		save `birthspec',replace
+		
+		use "${SOURCE}/DHS-DominicanRepublic1991/DHS-DominicanRepublic1991hm.dta", clear
+		duplicates drop 
+		ren shvivi hm_shstruct 
+		gen name = "`name'"
+	}
+	if inlist(name,"Niger1992"){
+		use "${SOURCE}/DHS-Niger1992/DHS-Niger1992birth.dta",clear
+		gen hm_shstruct = substr(caseid,8,3)
+		destring hm_shstruct,replace
+		save `birthspec',replace
+		
+		use "${SOURCE}/DHS-Niger1992/DHS-Niger1992hm.dta", clear
+		duplicates drop 
+		ren shstruct hm_shstruct 
+		gen name = "`name'"
+	}
+    rename (hv001 hv002 hvidx) (v001 v002 v003)
+
+    merge 1:m v001 hm_shstruct v002 v003 using `birthspec'
+
+    rename (v001 v002 v003) (hv001 hv002 hvidx) 
+    drop _merge
+}
 
 ************************************
 *****domains using wi data**********
 ************************************
 capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'wi.dta"
     if _rc == 0 {
-    use "${SOURCE}/DHS-`name'/DHS-`name'wi.dta", clear
-    ren whhid hhid 
-    ren wlthindf hv271
-    ren wlthind5 hv270
-    sort hhid
-    save `wi', replace 
+	preserve
+		use "${SOURCE}/DHS-`name'/DHS-`name'wi.dta", clear
+		ren whhid hhid 
+		ren wlthindf hv271
+		ren wlthind5 hv270
+		sort hhid
+		save `wi', replace 
+	restore
 	
 	*merge with 
-	merge 1:1 hhid using `hh',nogen
-	save `hh',replace
+	merge m:1 hhid using `wi',nogen
 	}
+    do "${DO}/15_household"
+	
+cap gen hm_shstruct = 999	
+keep hhid hv001 hm_shstruct hv002 hv003 hh_* 
+save `hh',replace
 
 ************************************
 *****merge to microdata*************
 ************************************
-
 ***match with external iso data
 use "${SOURCE}/external/iso", clear 
 keep country iso2c iso3c
+replace country = "BurkinaFaso" if country == "Burkina Faso"
+replace country = "DominicanRepublic" if country == "Dominican Republic"
+replace country = "Moldova" if country == "Moldova, Republic of"
+replace country = "Tanzania" if country == "Tanzania, United Republic of"
 save `iso'
 
 ***merge all subset of microdata
 use `birth',clear 
 mdesc hvidx //identify the case where there is no child line info in hm.dta 
-gen miss_b16 = 1 if r(percent) == 1 
+gen miss_b16 = 1 if r(percent) == 100 
 
 if miss_b16 == 1 {
    //when b16 is missing, the hm.dta can not be merged with birth.dta, the final microdata would be women and child only.
   
-    merge m:1 hv001 hv002 hvidx using `ind',nogen update //merge child in birth.dta to mother in ind.dta
-    merge m:m hv001 hv002       using `hh',nogen update 
+    merge m:1 hv001 hm_shstruct hv002 hvidx using `ind',nogen update //merge child in birth.dta to mother in ind.dta
+    merge m:m hv001 hm_shstruct hv002       using `hh',nogen update 
 }
 
 if miss_b16 != 1 {
 
   use `hm',clear //when b16 is not missing, the hm.dta can be merged with birth.dta, the final microdata has all household member info
 
-    merge 1:m hv001 hv002 hvidx using `birth',update              //missing update is zero, non missing conflict for all matched.(hvidx different) 
+    merge 1:m hv001 hm_shstruct hv002 hvidx using `birth',update              //missing update is zero, non missing conflict for all matched.(hvidx different) 
     replace hm_headrel = 99 if _merge == 2
 	label define hm_headrel_lab 99 "dead/no longer in the household"
 	label values hm_headrel hm_headrel_lab
 	replace hm_live = 0 if _merge == 2 | inlist(hm_headrel,.,12,98)
 	drop _merge
-    merge m:m hv001 hv002 hvidx using `ind',nogen update
-	merge m:m hv001 hv002       using `hh',nogen update 
+    merge m:m hv001 hm_shstruct hv002 hvidx using `ind',nogen update
+	merge m:m hv001 hm_shstruct hv002       using `hh',nogen update 
    
     tab hh_urban,mi  //check whether all hh member + dead child + child lives outside hh assinged hh info
 }
@@ -312,7 +412,6 @@ rename (hm_hc70 hm_hc71 ) (hc70 hc71)
 rename c_ant_sampleweight ant_sampleweight
 drop c_placeholder
 
-/*
 ***survey level data
     gen survey = "DHS-`name'"
 	gen year = real(substr("`name'",-4,.))
@@ -326,7 +425,12 @@ drop c_placeholder
 *** Quality Control: Validate with DHS official data
 gen surveyid = iso2c+year+"DHS"
 gen name = "`name'"
-    
+
+* to match with HEFPI_DHS.dta surveyid (differ in year)
+	if inlist(name,"BurkinaFaso1993") {
+		replace surveyid = "BF1992DHS"
+	}
+	
 preserve
 	do "${DO}/Quality_control"
 	save "${INTER}/quality_control-`name'",replace
@@ -390,7 +494,7 @@ restore
 	capture confirm file"${INTER}/zsc_hm.dta"
     if _rc == 0 {
     erase "${INTER}/zsc_hm.dta"
-    }	  */
+    }	  
 
 	
 save "${OUT}/DHS-`name'.dta", replace   

@@ -9,38 +9,19 @@
 gen w_papsmear = .
 gen w_mammogram = .
 
-capture confirm variable s714dd s714ee 
-if _rc==0 {
-    replace w_papsmear=1 if s714dd==1 & s714ee==1
-	replace w_papsmear=0 if s714dd==0 | s714ee==0
-	replace w_papsmear=. if s714dd==9 | s714ee==9
-}
-
-capture confirm variable s1011a s1011 s1012c s1012b
-if _rc == 0 {
+if inlist(name, "Brazil1996"){
     ren v012 wage	
-	replace s1011a=. if s1011a==98|s1011a==99
-    replace w_papsmear=1 if (s1011==1&s1011a<=23)
-    replace w_papsmear=0 if s1011==0
-    replace w_papsmear=0 if w_papsmear == . & s1011a>35 & s1011a<100
-    replace w_papsmear=. if s1011==.
+    replace w_papsmear=0 if s239!=.
+    replace w_papsmear=1 if s242==1
+    replace w_papsmear=. if s242==. & s239!=0
     tab wage if w_papsmear!=. /*DHS sample is women aged 15-49*/
     replace w_papsmear=. if wage<20|wage>49
 	
-	replace w_mammogram=1 if s1012c==1
-    replace w_mammogram=0 if s1012c==0|s1012b==0
+	replace w_mammogram=0 if s239!=.
+	replace w_mammogram=1 if s243==1
+    replace w_mammogram=. if inlist(s243,.,8) & s239!=0
     tab wage if w_mammogram!=. /*DHS sample is women aged 15-49*/
     replace w_mammogram=. if wage<40|wage>49
-}
-
-
-capture confirm variable qs415 qs416u 
-if _rc==0 {
-    ren qs23 wage
-    replace w_mammogram=(qs415==1&qs416u==1)
-    replace w_mammogram=. if qs415==.|qs415==8|qs415==9|qs416u==9
-    tab wage if w_mammogram!=. /*DHS sample is women aged 15-49*/
-    replace w_mammogram=. if wage<50|wage>69
 }
 // They may be country specific in surveys.
 
@@ -59,6 +40,10 @@ gen w_mammogram_age = "" //use string in the list: "20-49","20-59"; or missing a
 gen w_papsmear_age = ""  //use string in the list: "40-49","20-59"; or missing as ""
 
 
+if inlist(name, "Brazil1996"){
+    replace w_papsmear_age = "20-49"
+    replace w_mammogram_age = "40-49"
 
+}
 
 

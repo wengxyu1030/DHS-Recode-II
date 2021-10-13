@@ -3,8 +3,8 @@
 *** Sexual health*******
 ************************ 	
 
-	gen w_married=(v501==1)
-	replace w_married=. if v501==.
+	gen w_married=(v502==1)
+	replace w_married=. if v502==.
 	
 	*w_condom_conc: 18-49y woman who had more than one sexual partner in the last 12 months and used a condom during last intercourse
      ** Concurrent partnerships 
@@ -76,6 +76,32 @@
     *w_metany_fp_q 15-49y married or in union using modern contraceptives among those with need for family planning who use any contraceptives (1/0)
     gen w_metany_fp_q = (w_CPR == 1) if w_need_fp == 1 
 	 
+	* For Brazil1991, the v001/v002 lost 2-3 digits, fix this issue in main.do, 1.do,4.do,12.do & 13.do
+	if inlist(name,"Brazil1991"){
+		ren v023 hm_shstruct
+		order caseid v000 hm_shstruct v001 v002
+		isid hm_shstruct v001 v002 v003 
+	}	
+	if inlist(name,"Cameroon1991"){
+		drop v002
+		gen v002 = substr(caseid,11,2)
+		gen hm_shstruct = substr(caseid,8,3)
+		isid hm_shstruct v001 v002 v003  
+		order caseid v000 v001 hm_shstruct v002 v003
+		destring hm_shstruct v002,replace
+	}	
+	if inlist(name,"Colombia1990"){
+		drop v002
+		gen v002 = substr(caseid,10,3)
+		order caseid v000 v001 v002 v003
+		isid v001 v002 v003  
+		destring v002,replace 
+	}	 
+	if inlist(name,"DominicanRepublic1991","Niger1992"){
+		gen hm_shstruct = substr(caseid,8,3)
+		order caseid v000 v001 hm_shstruct v002  
+		isid v001 hm_shstruct v002 v003  
+		destring hm_shstruct,replace
+	}
 
-
-	
+cap gen hm_shstruct =999
