@@ -36,17 +36,17 @@ if `pc' != 0 global DO "${root}/STATA/DO/SC/DHS/DHS-Recode-II"
 
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
-
-// Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992         
-             
+        
+  
 /* 
 issues: 
 Colombia1990  variable hm_shstruct not found
 Tanzania1991 file C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA/RAW DATA/Recode II/DHS-Tanzania1991/DHS-Tanzania1991birth.dta not found
-
 */
 
-foreach name in Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992  { //{
+
+
+foreach name in  $DHScountries_Recode_II { 
 
 tempfile birth ind men hm hiv hh wi zsc iso 
 
