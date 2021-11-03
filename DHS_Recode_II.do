@@ -41,9 +41,7 @@ do "${DO}/0_GLOBAL.do"
 /* 
 issues: 
 Colombia1990  variable hm_shstruct not found
-Tanzania1991 file C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA/RAW DATA/Recode II/DHS-Tanzania1991/DHS-Tanzania1991birth.dta not found
 */
-
 
 
 foreach name in  $DHScountries_Recode_II { 
