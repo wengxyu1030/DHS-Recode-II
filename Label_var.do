@@ -78,8 +78,8 @@ label var c_treatdiarrhea  "0-4y with diarrhea in L2W got ORS (1/0)"
 label var c_diarrhea_med  "0-4y with diarreha received formal meds other than ORS"
 label var c_underweight  "0-4y WfA <-2 std.dev. from median (WHO) (1/0)"
 label var c_stunted  "0-4y HfA <-2 std.dev. from median (WHO) (1/0)"
-label var hc70  "ht/a standard deviations (according to who)hc70"
-label var hc71  "wt/a standard deviations (according to who)hc71"
+*label var hc70  "ht/a standard deviations (according to who)hc70"
+*label var hc71  "wt/a standard deviations (according to who)hc71"
 label var ant_sampleweight  "0-4y anthro sample weight"
 label var mor_ade  "Child age at death in months"
 label var mor_afl  "Child age at death imputation flag"
@@ -129,6 +129,21 @@ label var country  "WB country name"
 label var iso3c  "iso3c country code"
 label var iso2c  "iso2 country code"
 
+* DW NOV 2021
+		label var w_married "Marital Status"
+		label var c_vaczero "Child: Not Received Any Vaccination"
+		label var c_stu_was "Child: Child under five both stunted and wasted"
+		label var c_stu_was_sev "Child: Child under five both severely stunted and severely wasted"
+		label var c_motherln "The line number of the mother for each kid"
+		label var c_hfa "Child: 0-4y HfA std.dev. from median (WHO), hc70"
+		label var c_wfa "Child: 0-4y WfA std.dev. from median (WHO), hc71"
+		label var c_wfh "Child: 0-4y WfH std.dev. from median (WHO), hc72"	
+		label var hm_birthorder "Birth Order"
+		label var c_magebrt "Age of the mother at the child’s birth, based on hw1 and v012"
+		cap label var hh_religion "Head of Household Religion"
+		label var hh_watersource "Water Source"
+		label var hh_toilet "Toilet type"
+		
 foreach v of varlist * {
     local x : variable label `v'
     if "`x'" == "" drop `v'
