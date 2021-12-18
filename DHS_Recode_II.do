@@ -21,6 +21,7 @@ macro drop _all
 * Define root depend on the stata user. 
 if "`c(username)'" == "xweng"     local pc = 1
 	if "`c(username)'" == "robinwang"     local pc = 4
+
 if `pc' == 1 global root "C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA"
 	if `pc' == 4 global root "/Users/robinwang/Documents/MEASURE UHC DATA"
 
@@ -41,13 +42,28 @@ if `pc' != 0 global DO "${root}/STATA/DO/SC/DHS/DHS-Recode-II"
 
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
-        
-global DHScountries_Recode_II "Colombia1990"  
+
+// Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992         
+             
+global DHScountries_Recode_II "India2015"  
+
 /* 
 issues: 
 Colombia1990  variable hm_shstruct not found
+variables hv001 hm_shstruct hv002 hvidx do not uniquely identify observations in the
+    master data
+Tanzania1991 file C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA/RAW DATA/Recode II/DHS-Tanzania1991/DHS-Tanzania1991birth.dta not found
+- DW rerun with pause in the zsc section, then birth data could be read into programme successfully.
+- Additional raw data uploaded.
+- variables hv001 hm_shstruct hv002 hvidx do not uniquely identify observations in the
+    master data
 */
 
+/*
+foreach name in Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992  { //{
+*/
+        
+global DHScountries_Recode_II "Colombia1990"  
 
 foreach name in  $DHScountries_Recode_II { 
 
@@ -56,11 +72,9 @@ tempfile birth ind men hm hiv hh wi zsc iso
 ************************************
 ***domains using zsc data***********
 ************************************
-
-capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'zsc.DTA"	
+capture confirm file "${SOURCE}/DHS-`name'/DHS-`name'zsc.DTA"
 if _rc == 0 {
     use "${SOURCE}/DHS-`name'/DHS-`name'zsc.dta", clear
-	
     if hwlevel == 2 {
 		gen caseid = hwcaseid
 		gen bidx = hwline   	
@@ -168,14 +182,12 @@ if _rc == 0 {
     }
 
  }
- 
- 
+
 
 ******************************
 *****domains using birth data*
 ******************************
 use "${SOURCE}/DHS-`name'/DHS-`name'birth.dta", clear	
-
     gen hm_age_mon = (v008 - b3)           //hm_age_mon Age in months (children only)
     gen name = "`name'"
 	
