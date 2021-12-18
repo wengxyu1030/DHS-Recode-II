@@ -51,6 +51,15 @@
 	gen hh_wealthscore=hhwealthscore_old-hhwealthscore_oldmin
 	replace hh_wealthscore=hh_wealthscore/10e6 
 	}
+	
+*hh_religion: religion of household head (DW Team Nov 2021)
+	cap rename v130 hh_religion
+	
+*hh_watersource: Water source (hv201 in DHS HH dataset, already coded for MICS)
+	rename hv201 hh_watersource
+
+*hh_toilet: Toilet type (hv205 “”, already coded for MICS)
+	rename hv205 hh_toilet
 
 *hv001 Sampling cluster number (original)
 *hv002 Household number (original)

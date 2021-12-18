@@ -66,7 +66,7 @@ preserve
     }
 	
 ***for vriables generated from 9_child_anthropometrics
-	foreach var of var c_underweight c_stunted	hc70 hc71 ant_sampleweight{
+	foreach var of var c_underweight c_underweight_sev c_stunted c_stunted_sev c_wasted c_wasted_sev c_stu_was c_stu_was_sev ant_sampleweight hc70 hc71 hc72{
     replace `var' = . if !inrange(hm_age_mon,0,59)
     }
 
@@ -76,7 +76,7 @@ keep surveyid hvidx hv001 hv002 mor_ali ant_sampleweight w_sampleweight hh_sampl
 c_anc c_anc_bp	c_anc_bs	c_anc_ir	c_anc_ski c_anc_tet	c_anc_ur c_anc_ear	c_caesarean	c_earlybreast	c_sba  ///
 w_CPR	w_unmet_fp	w_need_fp w_metany_fp	w_metmod_fp	w_bmi_1549	w_obese_1549	w_overweight_1549 ///
 c_bcg	c_dpt1	c_dpt2	c_dpt3	c_fullimm	c_measles	c_polio1	c_polio2	c_polio3		///
-c_ari2 c_diarrhea 	c_diarrhea_hmf	c_diarrhea_mof c_diarrhea_pro	c_fever	c_treatdiarrhea c_treatARI2	c_underweight	c_stunted	c_ITN
+c_ari2 c_diarrhea 	c_diarrhea_hmf	c_diarrhea_mof c_diarrhea_pro	c_fever	c_treatdiarrhea c_treatARI2	c_underweight c_stunted c_wasted c_underweight_sev c_stunted_sev c_wasted_sev c_stu_was c_stu_was_sev hc70 hc71 hc72 c_ITN
 
 
 
@@ -107,7 +107,7 @@ egen value_my`var' = wtmean(`var'), weight(hh_sampleweight)
 }
 
 *indicators using ant_sampleweight
-foreach var of var c_underweight c_stunted{    
+foreach var of var c_underweight c_stunted c_wasted c_underweight_sev c_stunted_sev c_wasted_sev c_stu_was c_stu_was_sev{    
 egen value_my`var' = wtmean(`var'), weight(ant_sampleweight)
 }
 
@@ -178,7 +178,7 @@ The bidx is nt used in the hefpi indicator caluclation
     }
 	
 ***for vriables generated from 9_child_anthropometrics
-	foreach var of var c_underweight c_stunted	hc70 hc71 ant_sampleweight{
+	foreach var of var c_underweight c_underweight_sev c_stunted c_stunted_sev c_wasted c_wasted_sev c_stu_was c_stu_was_sev ant_sampleweight hc70 hc71 hc72{
     replace `var' = . if !inrange(hm_age_mon,0,59)
     }
 
@@ -208,7 +208,7 @@ egen value_my`var' = wtmean(`var'),weight(hh_sampleweight)
 }
 
 *indicator caculate for child_anthropometrics (using ant_sampleweight）
-foreach var of var c_underweight c_stunted {
+foreach var of var c_underweight c_underweight_sev c_stunted c_stunted_sev c_wasted c_wasted_sev c_stu_was c_stu_was_sev ant_sampleweight {
 egen value_my`var' = wtmean(`var'),weight(ant_sampleweight)
 }
 
