@@ -36,9 +36,17 @@ if `pc' != 0 global DO "${root}/STATA/DO/SC/DHS/DHS-Recode-II"
 
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do"
+<<<<<<< Updated upstream
 
 // Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992         
              
+=======
+        
+global DHScountries_Recode_II "India2015"  
+
+* 
+
+>>>>>>> Stashed changes
 /* 
 issues: 
 Colombia1990  variable hm_shstruct not found
