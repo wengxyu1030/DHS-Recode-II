@@ -44,9 +44,9 @@ if `pc' != 0 global DO "${root}/STATA/DO/SC/DHS/DHS-Recode-II"
 do "${DO}/0_GLOBAL.do"
 
 // Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992         
-             
-global DHScountries_Recode_II "India2015"  
 
+global DHScountries_Recode_II "Turkey1993"  
+             
 /* 
 issues: 
 Colombia1990  variable hm_shstruct not found
@@ -63,8 +63,6 @@ Tanzania1991 file C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA/RAW DATA/Recode
 foreach name in Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992  { //{
 */
         
-global DHScountries_Recode_II "Colombia1990"  
-
 foreach name in  $DHScountries_Recode_II { 
 
 tempfile birth ind men hm hiv hh wi zsc iso 
@@ -242,7 +240,10 @@ rename (v001 v002 b16) (hv001 hv002 hvidx)
 if miss_b16 == 1 {
 rename (v001 v002 v003) (hv001 hv002 hvidx) //v003 in birth.dta: mother's line number
 }
-
+	* FEB 2022 DW
+	gen w_married=(v502==1)
+	replace w_married=. if inlist(v502,.,9)
+	
 keep hv001 hv002 hvidx bidx c_* mor_* w_* hm_* 
 save `birth'
 
