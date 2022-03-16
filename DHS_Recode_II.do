@@ -27,6 +27,7 @@ if `pc' == 1 global root "C:/Users/XWeng/OneDrive - WBG/MEASURE UHC DATA"
 
 * Define path for data sources
 global SOURCE "${root}/RAW DATA/Recode II"
+	if `pc' == 4 global SOURCE "/Volumes/Seagate Portable Drive 1/HEFPI DATA/RAW DATA/DHS/DHS II"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -45,7 +46,7 @@ do "${DO}/0_GLOBAL.do"
 
 // Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992         
 
-global DHScountries_Recode_II "Turkey1993"  
+global DHScountries_Recode_II "Zambia1992"  
              
 /* 
 issues: 

@@ -193,7 +193,36 @@ order *,sequential
 	*c_anc_eff3_q: Effective ANC (4+ antenatal care visits, any skilled provider, blood pressure, blood and urine samples, tetanus vaccination, start in first trimester) among ANC users of births in last 2 years
     gen c_anc_eff3_q = .
 /*  gen c_anc_eff3_q = c_anc_eff3 if c_anc_any == 1 */
-	
+
+	*c_anc_hosp : Received antenatal care in the hospital
+	gen c_anc_hosp = .
+			* Use m57 vars in birth.dta to identify hospital antenatal care
+	replace c_anc_hosp = 0 if !mi(m15)  /// using m15 place-of-delivery is not the best way out
+
+	*c_anc_public : Received antenatal care in public facilities	 
+	gen c_anc_public = .
+	replace c_anc_public = 0 if !mi(m15)
+pause on
+pause DHS III Anc Before
+	capture confirm variable m57a
+	if !_rc {
+		foreach var of varlist m57a-m57x {
+			pause engage
+			capture confirm variable `var'
+			if !_rc {				
+				capture decode `var', gen(lower_`var')
+				if !_rc {
+					replace lower_`var' = lower(lower_`var')
+					local lab: variable label lower_`var' 
+					
+					replace c_anc_hosp = 1 if (regexm("`lab'","medical college|surgical") | (regexm("`lab'","hospital") | regexm("`lab'","hosp")) & !regexm("`lab'","sub-center")) & `var'==1	
+				
+					replace c_anc_public = 1 if ((regexm("`lab'","public") | regexm("`lab'","gov") | regexm("`lab'","nation") |regexm("`lab'","govt")|regexm("`lab'","government")) & !regexm("`lab'","private")) & `var'==1			
+				}			
+			}
+		}	
+	}
+		
 	*w_sampleweight.
 	gen w_sampleweight = v005/10e6
 
