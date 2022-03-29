@@ -46,8 +46,8 @@ do "${DO}/0_GLOBAL.do"
 
 // Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992         
 
-global DHScountries_Recode_II "Zambia1992"  
-             
+global DHScountries_Recode_II "Brazil1991 BurkinaFaso1993 Cameroon1991 Colombia1990 DominicanRepublic1991 Egypt1992 Ghana1993  Indonesia1991 Jordan1990 India1992 Kenya1993 Madagascar1992 Malawi1992 Morocco1992 Namibia1992 Niger1992 Nigeria1990 Pakistan1990 Paraguay1990 Peru1991 Philippines1993 Rwanda1992 Senegal1992 Senegal1997 Tanzania1991 Turkey1993 Yemen1991 Zambia1992 "  
+	
 /* 
 issues: 
 Colombia1990  variable hm_shstruct not found
@@ -516,7 +516,8 @@ restore
 	c_anc_eff3	c_anc_eff3_q	c_anc_ir	c_anc_ir_q	c_anc_ski	c_anc_ski_q ///
 	c_anc_tet	c_anc_tet_q	c_anc_ur	c_anc_ur_q	c_caesarean	c_earlybreast ///
 	c_facdel	c_hospdel	c_sba	c_sba_eff1	c_sba_eff1_q	c_sba_eff2 ///
-	c_sba_eff2_q	c_sba_q	c_skin2skin	c_pnc_any	c_pnc_eff	c_pnc_eff_q c_pnc_eff2	c_pnc_eff2_q {
+	c_sba_eff2_q	c_sba_q	c_skin2skin	c_pnc_any	c_pnc_eff	c_pnc_eff_q c_pnc_eff ///
+	c_pnc_eff2_q c_anc_hosp c_anc_public {
     replace `var' = . if !(inrange(hm_age_mon,0,23)& bidx ==1)
     }
 	
