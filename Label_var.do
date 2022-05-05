@@ -67,7 +67,7 @@ label var c_diarrhea_medfor  "0-4y with diarrhea in L2W got formal medicine othe
 label var c_diarrhea_mof  "0-4y with diarrhea in L2W given more to drink"
 label var c_diarrhea_pro  "0-4y with diarrhea in L2W seen by formal provider"
 label var c_diarrheaact  "0-4y with diarrhea in L2W seen by formal provider or given any form of treatment"
-label var c_diarrheaact_q  "0-4y with diarrhea in L2W seen by formal provider or given any form of treatment if receiving ORS"
+label var c_diarrheaact_q  "0-4y with diar got ORS, L2W seen by formal provider or any treatment"
 label var c_fever  "0-4y with fever in L2W"
 label var c_fevertreat  "0-4y with fever in L2W seen by formal healthcare provider"
 label var c_illness  "0-4 with diarrhea, rapid breathing and/or fever in L2W"
