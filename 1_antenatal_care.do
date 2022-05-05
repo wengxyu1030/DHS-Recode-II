@@ -23,6 +23,9 @@ order *,sequential
 	
 	*c_anc_ear: First antenatal care visit in first trimester of pregnancy of births in last 2 years
 	gen c_anc_ear = 0 if !inlist(m2n,.,9)    // m13 based on Women who had seen someone for antenatal care for their last born child
+	if inlist(name,"India1992","Indonesia1991"){
+		replace c_anc_ear=0 if c_anc!=. //India1992 - m2n all missing in survey; without change, ear rate goes up to 100, as there would be no observations with value 0 for demonimator
+	}
 	replace c_anc_ear = 1 if inrange(m13,0,3)
 	replace c_anc_ear = . if inlist(m13,98,99,.) & m2n !=1 
 
